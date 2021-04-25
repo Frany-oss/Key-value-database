@@ -9,15 +9,11 @@ fn main() {
     let value= arguments.next().expect("value was not there"); // if there is no string, then crash the program
 
     println!("The key is {} and the value is {}", key, value); // printing the key and the value
-    
-    // file will look like 
-    // mykey \t myvalue \n mykey2 \t myvalue2
 
-    // the key value pare to store in the database and then wirte it in a file
-    let contents = format!("|{}|\t|{}|\n", key, value); // format returns a string
-    std::fs::write("kv.db", contents).unwrap(); // storing the pair on a separete file 
+    let mut database = Database::new().expect("Creating Database failed!");
 
-    let database = Database::new().expect("Creating Database failed!");
+    database.insert(key.to_uppercase(), value.clone());
+    database.insert(key, value);
 
 }
 
@@ -33,14 +29,8 @@ impl Database {
         // hashMap that let us store pairs 
         let mut  map = HashMap::new();
 
-        // read the kv.db file ----------
-        // let contents = match std::fs::read_to_string("kv.db") {
-        //     Ok(c) => c,
-        //     Err(error) => {
-        //         return Result::Err(error);
-        //     }
-        // };
-        let contents = std::fs::read_to_string("kv.db")?; // the ? is to handle errors (like above)
+        // read the kv.db file 
+        let contents = std::fs::read_to_string("kv.db")?; // the ? is to handle errors
 
         for line in contents.lines() {
 
@@ -56,6 +46,12 @@ impl Database {
         
         // populate the file
         Ok(Database { map: map })
+    }
+
+    fn insert(&mut self, key: String, value: String) {
+
+        self.map.insert(key, value);
+
     }
 
 }

@@ -1,4 +1,6 @@
 
+#![allow(unused_variables)]
+
 use std::collections::HashMap;
 
 fn main() {
@@ -15,10 +17,17 @@ fn main() {
     database.insert(key.to_uppercase(), value.clone());
     database.insert(key, value);
 
+    match database.flush() {
+
+        Ok(()) => println!("Flush executed"),
+        Err(err) => println!("Flush couldn't execute"),
+    }
+
 }
 
 struct Database {
     map: HashMap<String, String>, // hashMap for key-value storage
+    flush: bool
 
 }
 
@@ -28,7 +37,6 @@ impl Database {
 
         // hashMap that let us store pairs 
         let mut  map = HashMap::new();
-
         // read the kv.db file 
         let contents = std::fs::read_to_string("kv.db")?; // the ? is to handle errors
 
@@ -45,7 +53,10 @@ impl Database {
         // parse the string
         
         // populate the file
-        Ok(Database { map: map })
+        Ok(Database { 
+            map,
+            flush: false,
+        })
     }
 
     fn insert(&mut self, key: String, value: String) {
@@ -54,6 +65,42 @@ impl Database {
 
     }
 
+    // Funtion when we want to handle and output the error
+    fn flush(mut self) -> std::io::Result<()> {
+        self.flush = true;
+        do_flush(&self)
+    }
 }
 
-//TODO: see if the file exists, if not then create it. use std::path::exist
+// Function when we do not want to handle errors of the write function
+impl Drop for Database {
+    fn drop(&mut self) {
+        
+        if !self.flush {
+            let _ = do_flush(self); // when you don't need the result 
+        }
+    }
+}
+
+// function to write the values in the map to the kv.db file 
+fn do_flush(database: &Database) -> std::io::Result<()> {
+
+    let mut contents = String::new();
+
+        // pushing the pair into the file kv.db 
+        for (key, value) in &database.map {
+
+            // let kvpair = format!("{}\t{}", key, value);
+            // contents.push_str(&kvpair);
+
+            // better this way for memory managment
+            contents.push_str(key);
+            contents.push('\t');
+            contents.push_str(value);
+            contents.push('\n');
+        }
+
+        std::fs::write("kv.db", contents) 
+
+
+}

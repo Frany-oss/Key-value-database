@@ -39,7 +39,7 @@ impl Database {
         // read the kv.db file 
         let contents = std::fs::read_to_string("kv.db")?; // the ? is to handle errors
 
-        for line in contents.lines() {
+        for line in contents.lines() { // lines() to read each line in a file (in this case) line is separete by \n
 
             let mut chunks = line.splitn(2, '\t'); // spliting into 2 chuncks
 

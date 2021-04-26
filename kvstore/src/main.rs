@@ -67,7 +67,7 @@ impl Database {
     // Funtion when we want to handle and output the error
     fn flush(mut self) -> std::io::Result<()> {
         self.flush = true;
-        do_flush(&self)
+        do_flush(&self) 
     }
 }
 
